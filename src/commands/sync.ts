@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { join } from "node:path";
 import type { Command } from "commander";
-import { brvQuery } from "../brv-process.js";
+import { BrvBridge } from "@byterover/brv-bridge";
 import { getCcMemoryDir } from "../memory-path.js";
 import { StopHookInputSchema } from "../schemas/cc-hook-input.js";
 import { readStdinJson } from "../stdin.js";
@@ -36,16 +36,12 @@ export function registerSyncCommand(program: Command): void {
         // Query ByteRover for ranked knowledge
         let queryResult: string | undefined;
         try {
-          const response = await brvQuery({
-            cwd,
-            query:
-              "List the most important knowledge entries from _cc/ domain, ranked by importance. Return a concise summary.",
-            timeoutMs: 8_000,
-          });
-          queryResult =
-            response.data?.result ?? response.data?.content ?? undefined;
-          if (queryResult && !queryResult.trim()) {
-            queryResult = undefined;
+          const bridge = new BrvBridge({ cwd, recallTimeoutMs: 8_000 });
+          const { content } = await bridge.recall(
+            "List the most important knowledge entries from _cc/ domain, ranked by importance. Return a concise summary.",
+          );
+          if (content) {
+            queryResult = content;
           }
         } catch {
           // brv query failed or timed out — fall through to stub

@@ -282,7 +282,6 @@ node dist/cli.js doctor
 ```
 src/
   cli.ts                      # Commander.js entry point
-  brv-process.ts              # brv CLI spawning (curate, query) with timeout/abort
   cc-frontmatter.ts           # Claude Code memory YAML frontmatter parser
   memory-path.ts              # Full cc-ts memory path resolution (git root, worktrees, env vars)
   stdin.ts                    # Read + validate JSON from stdin
@@ -301,4 +300,4 @@ src/
 
 ## License
 
-MIT
+[Elastic License 2.0 (ELv2)](./LICENSE)
