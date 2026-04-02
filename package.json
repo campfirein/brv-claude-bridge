@@ -8,11 +8,13 @@
   },
   "main": "./dist/cli.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsx src/cli.ts",
     "test": "vitest run --dir test",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run build && npm test"
   },
   "files": [
     "dist/**/*.js",
@@ -21,6 +23,7 @@
     "LICENSE"
   ],
   "dependencies": {
+    "@byterover/brv-bridge": "^1.0.0",
     "commander": "^13.0.0",
     "js-yaml": "^4.1.0",
     "picocolors": "^1.1.0",
@@ -41,9 +44,17 @@
     "bridge"
   ],
   "author": "ByteRover",
-  "license": "MIT",
+  "license": "Elastic-2.0",
   "engines": {
     "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/campfirein/brv-claude-bridge.git"
+  },
+  "homepage": "https://github.com/campfirein/brv-claude-bridge#readme",
+  "bugs": {
+    "url": "https://github.com/campfirein/brv-claude-bridge/issues"
   },
   "publishConfig": {
     "access": "public"
