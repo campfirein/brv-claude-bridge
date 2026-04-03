@@ -103,7 +103,7 @@ export function registerIngestCommand(program: Command): void {
       } catch (err) {
         // All errors → stderr + exit 0. Never exit 2 (would block Claude).
         process.stderr.write(
-          `brv-claude-bridge ingest error: ${err instanceof Error ? err.message : String(err)}\n`,
+          `brv-claude-plugin ingest error: ${err instanceof Error ? err.message : String(err)}\n`,
         );
         process.exit(0);
       }

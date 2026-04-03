@@ -1,10 +1,10 @@
 {
-  "name": "@byterover/claude-bridge",
+  "name": "@byterover/claude-plugin",
   "version": "0.1.0",
   "description": "Native bridge between ByteRover context engine and Claude Code — enriches Claude's auto-memory with BM25-ranked knowledge from brv context tree",
   "type": "module",
   "bin": {
-    "brv-claude-bridge": "./dist/cli.js"
+    "brv-claude-plugin": "./dist/cli.js"
   },
   "main": "./dist/cli.js",
   "scripts": {
@@ -50,11 +50,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/campfirein/brv-claude-bridge.git"
+    "url": "git+https://github.com/campfirein/brv-claude-plugin.git"
   },
-  "homepage": "https://github.com/campfirein/brv-claude-bridge#readme",
+  "homepage": "https://github.com/campfirein/brv-claude-plugin#readme",
   "bugs": {
-    "url": "https://github.com/campfirein/brv-claude-bridge/issues"
+    "url": "https://github.com/campfirein/brv-claude-plugin/issues"
   },
   "publishConfig": {
     "access": "public"

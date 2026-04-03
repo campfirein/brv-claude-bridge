@@ -142,7 +142,7 @@ export function registerSyncCommand(program: Command): void {
       } catch (err) {
         // Best-effort — never block Claude
         process.stderr.write(
-          `brv-claude-bridge sync error: ${err instanceof Error ? err.message : String(err)}\n`,
+          `brv-claude-plugin sync error: ${err instanceof Error ? err.message : String(err)}\n`,
         );
         process.exit(0);
       }
