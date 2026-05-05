@@ -19,7 +19,10 @@ const PREFIX_TO_STRIP = ".brv/context-tree/";
 // Capture from "**Sources**:" through the next blank-line-then-heading boundary OR end of string.
 // Backticked items are isolated by a non-greedy capture; non-list lines after Sources end the block.
 const SOURCES_BLOCK_REGEX = /\*\*Sources\*\*:\s*\n([\s\S]*?)(?:\n\s*\n|$)/;
-const LIST_ITEM_REGEX = /^\s*-\s*`([^`]+)`/gm;
+// Match list items with OR without backtick fencing — Tier 2 direct-search emits backticked paths
+// (`- \`path\``) but LLM-synthesised output in Tier 3/4 often drops the backticks (`- path`).
+// Backtick group is optional so both render the same captured path.
+const LIST_ITEM_REGEX = /^\s*-\s*`?([^`\n]+?)`?\s*$/gm;
 
 export function parseSourcesFromContent(content: string): string[] {
   if (!content) return [];

@@ -51,6 +51,30 @@ some details here.
     expect(parseSourcesFromContent(content)).toEqual(["a.md", "b.md"]);
   });
 
+  it("handles non-backticked list items (LLM-synthesised Tier 3/4 output)", () => {
+    const content = `**Sources**:
+- .brv/context-tree/testing/eng_2548/provider_activation_verification.md
+- .brv/context-tree/testing/eng_2548/option_b_verification.md
+
+**Gaps**: …`;
+    expect(parseSourcesFromContent(content)).toEqual([
+      "testing/eng_2548/provider_activation_verification.md",
+      "testing/eng_2548/option_b_verification.md",
+    ]);
+  });
+
+  it("handles a mix of backticked and non-backticked items in the same block", () => {
+    const content = `**Sources**:
+- \`auth/jwt.md\`
+- billing/stripe.md
+- \`design/cache.md\``;
+    expect(parseSourcesFromContent(content)).toEqual([
+      "auth/jwt.md",
+      "billing/stripe.md",
+      "design/cache.md",
+    ]);
+  });
+
   it("stops at the next markdown heading (Gaps, Details, etc.)", () => {
     const content = `**Sources**:\n- \`a.md\`\n- \`b.md\`\n\n**Gaps**: this should not be parsed as a source\n- \`should-not-appear.md\``;
     expect(parseSourcesFromContent(content)).toEqual(["a.md", "b.md"]);
