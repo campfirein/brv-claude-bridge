@@ -8,7 +8,7 @@
   },
   "main": "./dist/cli.js",
   "scripts": {
-    "build": "rm -rf dist && tsc && chmod +x dist/cli.js",
+    "build": "rm -rf dist && tsc",
     "dev": "tsx src/cli.ts",
     "test": "vitest run --dir test",
     "typecheck": "tsc --noEmit",
