@@ -23,7 +23,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "@byterover/brv-bridge": "^1.0.2",
+    "@byterover/brv-bridge": "^1.2.0",
     "commander": "^13.0.0",
     "js-yaml": "^4.1.0",
     "picocolors": "^1.1.0",
