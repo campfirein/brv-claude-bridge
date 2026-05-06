@@ -8,6 +8,7 @@ import {
   readSettingsRaw,
   writeSettingsRaw,
 } from "../schemas/cc-settings.js";
+import { removeOurStatusline } from "./uninstall-statusline.js";
 
 interface UninstallOpts {
   settingsPath?: string;
@@ -32,64 +33,67 @@ export function registerUninstallCommand(program: Command): void {
           | Record<string, unknown[]>
           | undefined;
 
-        if (!hooks || typeof hooks !== "object") {
-          console.log(pc.yellow("No hooks found in settings. Nothing to remove."));
-          return;
-        }
-
         let removed = 0;
 
-        for (const event of Object.keys(hooks)) {
-          const eventHooks = hooks[event];
-          if (!Array.isArray(eventHooks)) continue;
+        if (hooks && typeof hooks === "object") {
+          for (const event of Object.keys(hooks)) {
+            const eventHooks = hooks[event];
+            if (!Array.isArray(eventHooks)) continue;
 
-          // Per-hook removal: within each matcher entry, remove only bridge hooks
-          for (let i = eventHooks.length - 1; i >= 0; i--) {
-            const matcherEntry = eventHooks[i] as Record<string, unknown>;
-            const innerHooks = matcherEntry.hooks;
-            if (!Array.isArray(innerHooks)) continue;
+            // Per-hook removal: within each matcher entry, remove only bridge hooks
+            for (let i = eventHooks.length - 1; i >= 0; i--) {
+              const matcherEntry = eventHooks[i] as Record<string, unknown>;
+              const innerHooks = matcherEntry.hooks;
+              if (!Array.isArray(innerHooks)) continue;
 
-            const filtered = innerHooks.filter((h: unknown) => {
-              if (
-                typeof h === "object" &&
-                h !== null &&
-                isBridgeHook(h as Record<string, unknown>)
-              ) {
-                removed++;
-                return false;
+              const filtered = innerHooks.filter((h: unknown) => {
+                if (
+                  typeof h === "object" &&
+                  h !== null &&
+                  isBridgeHook(h as Record<string, unknown>)
+                ) {
+                  removed++;
+                  return false;
+                }
+                return true;
+              });
+
+              if (filtered.length === 0) {
+                // All hooks in this matcher entry were bridge hooks — remove the entry
+                eventHooks.splice(i, 1);
+              } else {
+                matcherEntry.hooks = filtered;
               }
-              return true;
-            });
+            }
 
-            if (filtered.length === 0) {
-              // All hooks in this matcher entry were bridge hooks — remove the entry
-              eventHooks.splice(i, 1);
-            } else {
-              matcherEntry.hooks = filtered;
+            // Clean up empty event arrays
+            if (eventHooks.length === 0) {
+              delete hooks[event];
             }
           }
 
-          // Clean up empty event arrays
-          if (eventHooks.length === 0) {
-            delete hooks[event];
+          // Clean up empty hooks object
+          if (Object.keys(hooks).length === 0) {
+            delete settings.hooks;
           }
         }
 
-        // Clean up empty hooks object
-        if (Object.keys(hooks).length === 0) {
-          delete settings.hooks;
-        }
+        // Also remove our statusLine entry (foreign statusLines are left alone).
+        const statuslineRemoved = removeOurStatusline(settings);
 
-        if (removed === 0) {
-          console.log(pc.yellow("No bridge hooks found. Nothing to remove."));
+        if (removed === 0 && !statuslineRemoved) {
+          console.log(pc.yellow("No bridge hooks or status line found. Nothing to remove."));
           return;
         }
 
         backupSettings(settingsPath);
         writeSettingsRaw(settingsPath, settings);
 
+        const summary: string[] = [];
+        if (removed > 0) summary.push(`${removed} bridge hook(s)`);
+        if (statuslineRemoved) summary.push("status line");
         console.log(
-          pc.green(`Removed ${removed} bridge hook(s) from ${settingsPath}`),
+          pc.green(`Removed ${summary.join(" + ")} from ${settingsPath}`),
         );
       } catch (err) {
         console.error(
