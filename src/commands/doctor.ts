@@ -6,11 +6,14 @@ import pc from "picocolors";
 import { isBridgeHook, resolveBridgeExecutable } from "../bridge-command.js";
 import { getCcMemoryDir, getClaudeConfigHome } from "../memory-path.js";
 import { readSettingsRaw } from "../schemas/cc-settings.js";
+import { diagnoseStatuslineConflict } from "./install-statusline.js";
 
 interface CheckResult {
   label: string;
   pass: boolean;
   detail?: string;
+  /** Opt-in features whose absence should not flip overall status to "failed". */
+  optional?: boolean;
 }
 
 export function registerDoctorCommand(program: Command): void {
@@ -104,7 +107,42 @@ export function registerDoctorCommand(program: Command): void {
         });
       }
 
-      // 6. cc memory dir resolves
+      // 6. Status line registered (opt-in)
+      if (settingsValid) {
+        const settings = readSettingsRaw(settingsPath);
+        const slState = diagnoseStatuslineConflict(settings);
+        if (slState === "ours") {
+          results.push({
+            label: "Status line",
+            pass: true,
+            detail: "registered, points to our binary",
+          });
+        } else if (slState === "absent") {
+          results.push({
+            label: "Status line",
+            pass: false,
+            detail: "not installed (run `brv-claude-plugin install-statusline` to enable)",
+            optional: true,
+          });
+        } else {
+          results.push({
+            label: "Status line",
+            pass: false,
+            detail:
+              "another statusLine is configured (run `brv-claude-plugin install-statusline --force` to overwrite)",
+            optional: true,
+          });
+        }
+      } else {
+        results.push({
+          label: "Status line",
+          pass: false,
+          detail: "cannot check — settings invalid",
+          optional: true,
+        });
+      }
+
+      // 7. cc memory dir resolves
       try {
         const memDir = getCcMemoryDir(cwd);
         const memExists = existsSync(memDir);
@@ -130,7 +168,7 @@ export function registerDoctorCommand(program: Command): void {
         const icon = r.pass ? pc.green("\u2713") : pc.red("\u2717");
         const detail = r.detail ? pc.dim(` — ${r.detail}`) : "";
         console.log(`  ${icon} ${r.label}${detail}`);
-        if (!r.pass) allPass = false;
+        if (!r.pass && !r.optional) allPass = false;
       }
       console.log();
 
